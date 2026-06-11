@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useFootprint } from "@/hooks/useFootprint";
 import Link from "next/link";
 import { GoalsPanel } from "@/components/goals/GoalsPanel";

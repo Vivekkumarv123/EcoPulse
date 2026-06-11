@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { AssessmentForm } from "@/components/assessment/AssessmentForm";
 import Link from "next/link";
 
