@@ -7,7 +7,25 @@
 import { AssessmentForm } from "@/components/assessment/AssessmentForm";
 import Link from "next/link";
 
+import { useEffect, useState } from "react";
+
 export default function AssessmentPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <main id="main-content" className="mx-auto max-w-2xl p-4">
+        <header className="flex items-center justify-between">
+          <div className="h-8 w-48 animate-pulse rounded bg-white/5" />
+        </header>
+      </main>
+    );
+  }
+
   return (
     <main id="main-content" className="mx-auto max-w-2xl p-4">
       <header className="flex items-center justify-between">
