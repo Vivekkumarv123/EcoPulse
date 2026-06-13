@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/strip-sri.js",
     "start": "next start",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "lint:security": "eslint src --ext .js,.jsx,.ts,.tsx",
