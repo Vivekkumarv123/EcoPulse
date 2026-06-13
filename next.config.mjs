@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    sri: {
-      algorithm: 'sha384',
-    },
-  },
   async headers() {
     return [
       {
