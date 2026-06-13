@@ -31,7 +31,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
           <div className="rounded-3xl border border-white/[0.06] bg-slate-900/80 p-5 text-left text-xs text-slate-300">
             <p className="font-semibold text-slate-200">Error details</p>
             <pre className="mt-3 max-h-40 overflow-auto text-[11px] leading-5 text-slate-300">
-              {error.message}
+              An unexpected application rendering error occurred. Internal logs have been recorded securely.
             </pre>
           </div>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
