@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Global error boundary UI used by Next.js app router on render errors.
+ * Displays error details and provides simple recovery actions.
+ */
 import { useEffect } from "react";
 import Link from "next/link";
 

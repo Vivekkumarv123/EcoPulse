@@ -1,3 +1,10 @@
+/**
+ * Carbon multipliers lookup table.
+ * Values are per-unit emissions used by calculation helpers.
+ * Keep these values conservative and well-documented; they are used
+ * throughout the application for calculations and tests.
+ * @module lib/constants
+ */
 export const CARBON_MULTIPLIERS = {
   transport: {
     car: 0.18,      // kg CO2e per km
@@ -21,6 +28,10 @@ export const CARBON_MULTIPLIERS = {
   }
 } as const;
 
+/**
+ * Default target values for monitored categories.
+ * These represent weekly default targets used to initialize `targets`.
+ */
 export const DEFAULT_TARGETS = {
   total: 400, // standard weekly target (kg CO2e)
   transport: 120,
@@ -29,6 +40,9 @@ export const DEFAULT_TARGETS = {
   waste: 50
 } as const;
 
+/**
+ * Initial user settings used for onboarding and local defaults.
+ */
 export const INITIAL_USER_SETTINGS = {
   theme: "system" as const,
   language: "en" as const,

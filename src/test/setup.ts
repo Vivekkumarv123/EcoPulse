@@ -5,7 +5,13 @@ import type { AxeMatchers } from "vitest-axe/matchers";
 
 /* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 declare module "vitest" {
+  /**
+   * Extended Vitest assertion interface with accessibility matchers.
+   */
   export interface Assertion<T = any> extends AxeMatchers {}
+  /**
+   * Extended Vitest asymmetric matcher interface with accessibility matchers.
+   */
   export interface AsymmetricMatchersContaining extends AxeMatchers {}
 }
 /* eslint-enable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */

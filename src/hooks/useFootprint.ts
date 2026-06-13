@@ -1,25 +1,24 @@
 "use client";
 
-import { useContext, useMemo, useState, useCallback, useRef } from "react";
+import { useContext, useMemo, useState, useCallback } from "react";
 import { FootprintStateContext, FootprintDispatchContext } from "@/components/providers/AppProvider";
-import { CARBON_MULTIPLIERS } from "@/lib/constants";
-import { CarbonCategory, Insight } from "@/types";
+import { MULTIPLIER_CACHE, MULTIPLIER_DEFAULTS } from "@/lib/calculator";
+import { CarbonCategory } from "@/types";
+import { PAGINATION } from "@/lib/formConstants";
+import { usePagination } from "@/hooks/usePagination";
+import { useInsights } from "@/hooks/useInsights";
 
-const ITEMS_PER_PAGE = 10;
-
-// Performance: Memoized multiplier lookup cache
-const MULTIPLIER_CACHE = new Map<CarbonCategory, Record<string, number>>(
-  Object.entries(CARBON_MULTIPLIERS) as [CarbonCategory, Record<string, number>][]
-);
-
-// Performance: Default multipliers for each category
-const MULTIPLIER_DEFAULTS: Record<CarbonCategory, string> = {
-  "transport": "car",
-  "food": "balanced",
-  "energy": "electricity",
-  "waste": "landfill"
-} as const;
-
+/**
+ * Hook: useFootprint
+ *
+ * Provides application footprint state selectors, derived data (breakdown, insights),
+ * pagination and helper actions. This hook is intentionally read-only for state and
+ * exposes dispatch methods from the `AppProvider`.
+ *
+ * @returns Read-only state slices and action dispatchers for the footprint app
+ * Time Complexity: Derived values use memoization; most ops are O(1) or O(N) for lists
+ * Space Complexity: O(1) additional per hook instance
+ */
 export function useFootprint() {
   const state = useContext(FootprintStateContext);
   const dispatch = useContext(FootprintDispatchContext);
@@ -30,12 +29,8 @@ export function useFootprint() {
 
   const { entries, targets, settings, goals, challenges } = state;
 
-  // Filtering & Pagination state
+  // Filtering state
   const [selectedCategory, setSelectedCategory] = useState<CarbonCategory | "all">("all");
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Memory: Cache for previous page calculation
-  const totalPagesRef = useRef(1);
 
   /**
    * Calculates carbon entry with memoized lookups.
@@ -67,18 +62,11 @@ export function useFootprint() {
     return entries.filter((entry) => entry.category === selectedCategory);
   }, [entries, selectedCategory]);
 
-  // Pagination calculations - optimized with ref to avoid recalculations
-  const totalPages = Math.max(1, Math.ceil(filteredEntries.length / ITEMS_PER_PAGE));
-  totalPagesRef.current = totalPages;
-
-  const paginatedEntries = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredEntries.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredEntries, currentPage]);
-
+  const { currentPage, totalPages, paginated, goToPage } = usePagination(filteredEntries, PAGINATION.ITEMS_PER_PAGE);
+  const paginatedEntries = paginated;
   const changePage = useCallback((page: number) => {
-    setCurrentPage(() => Math.max(1, Math.min(page, totalPages)));
-  }, [totalPages]);
+    goToPage(page);
+  }, [goToPage]);
 
   /**
    * Category breakdown with optimized accumulation.
@@ -121,62 +109,14 @@ export function useFootprint() {
    * Time Complexity: O(1)
    * Space Complexity: O(1)
    */
-  const insights = useMemo<readonly Insight[]>(() => {
-    const list: Insight[] = [];
-
-    // Performance: Threshold evaluation with early returns
-    if (breakdown.transport > 50) {
-      list.push({
-        id: "a2e11ef6-750a-4f83-94a4-871f8a40dc41",
-        title: "High Transportation Footprint",
-        message: "Your transportation carbon footprint is high. Biking, walking, or using public transit once a week can reduce this significantly.",
-        impactLevel: "high",
-        actionText: "Log a Transit Action"
-      });
-    }
-
-    if (breakdown.food > 40) {
-      list.push({
-        id: "a2e11ef6-750a-4f83-94a4-871f8a40dc42",
-        title: "Reduce Diet Footprint",
-        message: "Diet is a major factor. Trying a vegetarian menu for three days a week can cut food emissions by almost 30%.",
-        impactLevel: "medium",
-        actionText: "Try Vegan Choice"
-      });
-    }
-
-    if (breakdown.energy > 80) {
-      list.push({
-        id: "a2e11ef6-750a-4f83-94a4-871f8a40dc43",
-        title: "Energy Efficiency Tip",
-        message: "Unplugging unused chargers and electronics can prevent standby energy drain.",
-        impactLevel: "medium",
-        actionText: "Save Electricity"
-      });
-    }
-
-    // Default general insight - only shown when no other insights apply
-    if (list.length === 0) {
-      list.push({
-        id: "a2e11ef6-750a-4f83-94a4-871f8a40dc40",
-        title: "Welcome to EcoPulse!",
-        message: "Start logging your actions (transport, food, energy, waste) to see your carbon analysis and personal savings recommendations here.",
-        impactLevel: "low",
-        actionText: "Log First Action"
-      });
-    }
-
-    return list as readonly Insight[];
-  }, [breakdown]);
+  const insights = useInsights(breakdown);
 
   // Calculate goal progress dynamically
-  const goalsWithProgress = useMemo(() => {
-    return goals.map((g) => {
-      const current = breakdown[g.category];
-      const progress = g.targetValue > 0 ? Math.min(100, Math.round((current / g.targetValue) * 100)) : 0;
-      return { ...g, progress };
-    });
-  }, [goals, breakdown]);
+  const goalsWithProgress = useMemo(() => goals.map((g) => {
+    const current = breakdown[g.category];
+    const progress = g.targetValue > 0 ? Math.min(100, Math.round((current / g.targetValue) * 100)) : 0;
+    return { ...g, progress };
+  }), [goals, breakdown]);
 
   return {
     entries,
@@ -196,5 +136,3 @@ export function useFootprint() {
     ...dispatch
   };
 }
-
-// Helper reference injection (imports consolidated at top)

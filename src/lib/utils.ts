@@ -3,6 +3,10 @@ import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 import { StorageEnvelopeSchema } from "./schemas";
 
+/**
+ * Version marker for persisted storage envelopes.
+ * Used to detect upgrades or invalid payloads on deserialization.
+ */
 export const STORAGE_VERSION = 1;
 
 // Performance: Precompute HTML escape map (reduces memory allocations)

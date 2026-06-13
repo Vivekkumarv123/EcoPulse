@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Home page — marketing and quick links into the assessment and dashboard flows.
+ * Lightweight static content; intentionally presentation-only.
+ */
 import Link from "next/link";
 
 export default function Home() {

@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Assessment page — hosts the `AssessmentForm` for logging carbon entries.
+ * This page wires the presentational form to `useAssessmentForm` via the component.
+ */
 import { AssessmentForm } from "@/components/assessment/AssessmentForm";
 import Link from "next/link";
 

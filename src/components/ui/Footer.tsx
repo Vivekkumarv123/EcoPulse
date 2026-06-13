@@ -1,36 +1,19 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
+import { FOOTER_LINKS } from "@/lib/navigation";
 
-export function Footer() {
+/**
+ * `Footer` component — App footer with brand description and link groups.
+ *
+ * Uses centralized link groups from `src/lib/navigation.ts` to ensure consistency
+ * across the app.
+ *
+ * @returns JSX.Element
+ */
+function FooterComponent() {
   const currentYear = new Date().getFullYear();
-
-  const footerLinks = [
-    {
-      title: "Platform",
-      links: [
-        { name: "Assessment", href: "/assessment" },
-        { name: "Dashboard", href: "/dashboard" },
-        { name: "Integrations", href: "#" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { name: "Methodology", href: "#" },
-        { name: "API Docs", href: "#" },
-        { name: "Community", href: "/" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { name: "Privacy Policy", href: "#" },
-        { name: "Terms of Service", href: "#" },
-        { name: "Security", href: "#" },
-      ],
-    },
-  ];
 
   return (
     <footer className="w-full mt-24 border-t border-white/[0.04] bg-gradient-to-b from-transparent to-white/[0.01]" role="contentinfo">
@@ -52,7 +35,7 @@ export function Footer() {
 
           {/* Dynamic Link Menus Grid */}
           <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
-            {footerLinks.map((group) => (
+            {FOOTER_LINKS.map((group) => (
               <div key={group.title} className="flex flex-col gap-3.5">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
                   {group.title}
@@ -99,3 +82,5 @@ export function Footer() {
     </footer>
   );
 }
+
+export const Footer = React.memo(FooterComponent);

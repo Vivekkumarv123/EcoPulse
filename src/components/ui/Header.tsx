@@ -1,16 +1,20 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NAV_ITEMS } from "@/lib/navigation";
 
-export function Header() {
+/**
+ * `Header` component — App top navigation and brand identity.
+ *
+ * Static navigation items are sourced from `src/lib/navigation.ts`.
+ * Memoized to avoid unnecessary re-renders.
+ *
+ * @returns JSX.Element
+ */
+function HeaderComponent() {
   const pathname = usePathname();
-
-  const navItems = [
-    { name: "Assessment", href: "/assessment" },
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Community", href: "/" },
-  ];
 
   return (
     <header 
@@ -41,7 +45,7 @@ export function Header() {
         {/* Center Navigation Links */}
         <nav aria-label="Main navigation" className="hidden md:block">
           <ul className="flex items-center gap-1 bg-white/[0.02] border border-white/[0.04] p-1.5 rounded-full backdrop-blur-sm">
-            {navItems.map((item) => {
+            {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <li key={item.name}>
@@ -82,3 +86,5 @@ export function Header() {
     </header>
   );
 }
+
+export const Header = React.memo(HeaderComponent);

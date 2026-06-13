@@ -1,3 +1,7 @@
+/**
+ * 404 Not Found page.
+ * Simple user-facing fallback for missing routes.
+ */
 import Link from "next/link";
 
 export default function NotFound() {

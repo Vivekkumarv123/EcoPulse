@@ -92,6 +92,10 @@ EcoPulse is designed for secure local-first usage:
 - **Prototype Pollution Protection** in localStorage parsing.
 - **Safe Storage Parsing** with versioned envelopes.
 - **Corruption Recovery** by replacing invalid payloads with defaults.
+
+## Code Quality
+
+The project follows a dedicated quality guide in `CODE_QUALITY.md`, including type safety, linting, testing, and refactoring standards.
 - **Secure UUID Generation** using browser crypto APIs.
 
 ### Complexity Analysis
