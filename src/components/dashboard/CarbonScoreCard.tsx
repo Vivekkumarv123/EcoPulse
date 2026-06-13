@@ -16,7 +16,10 @@ export function CarbonScoreCard({ total }: { total: number }) {
         Aggregate Carbon Footprint Index
       </span>
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text font-mono text-5xl font-black tracking-tighter text-transparent">
+        <span
+          className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text font-mono text-5xl font-black tracking-tighter text-transparent"
+          suppressHydrationWarning
+        >
           {total.toLocaleString()}
         </span>
         <span className="text-sm font-bold tracking-wide text-slate-400">kg CO₂e / period</span>

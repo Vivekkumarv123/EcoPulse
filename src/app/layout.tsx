@@ -9,7 +9,10 @@ import { Footer } from "@/components/ui/Footer";
  */
 export const metadata: Metadata = {
   title: "EcoPulse - Carbon Footprint Tracker",
-  description: "Track, understand, and reduce your carbon footprint with actionable insights."
+  description: "Track, understand, and reduce your carbon footprint with actionable insights.",
+  icons: {
+    icon: "/favicon.svg"
+  }
 };
 
 /**
