@@ -1,7 +1,8 @@
 import "@testing-library/jest-dom";
-import { expect, vi } from "vitest";
+import { expect, vi, beforeEach } from "vitest";
 import * as axeMatchers from "vitest-axe/matchers";
 import type { AxeMatchers } from "vitest-axe/matchers";
+import { storageRateLimiter } from "@/lib/utils";
 
 /* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 declare module "vitest" {
@@ -15,6 +16,11 @@ declare module "vitest" {
   export interface AsymmetricMatchersContaining extends AxeMatchers {}
 }
 /* eslint-enable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+
+// Reset rate limiter before each test to avoid cross-test contamination in parallel runs
+beforeEach(() => {
+  storageRateLimiter.reset();
+});
 
 // Extend Vitest expectations with vitest-axe matchers
 expect.extend(axeMatchers);
