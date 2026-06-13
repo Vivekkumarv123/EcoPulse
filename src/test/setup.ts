@@ -4,6 +4,9 @@ import * as axeMatchers from "vitest-axe/matchers";
 import type { AxeMatchers } from "vitest-axe/matchers";
 import { storageRateLimiter } from "@/lib/utils";
 
+// Robust test environment flag for client-side environment check
+(globalThis as unknown as Record<string, unknown>).__IS_TEST__ = true;
+
 /* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 declare module "vitest" {
   /**

@@ -219,7 +219,8 @@ export function saveToStorage<T>(key: string, data: T): void {
   }
 
   // Rate limit writes to prevent write loops / storage spamming
-  if (!process.env.VITEST && !storageRateLimiter.isAllowed()) {
+  const isTest = typeof globalThis !== "undefined" && (globalThis as Record<string, unknown>).__IS_TEST__ === true;
+  if (!isTest && !storageRateLimiter.isAllowed()) {
     console.warn(`[RATE LIMIT] Storage write rate limit exceeded for key: ${key}`);
     return;
   }
