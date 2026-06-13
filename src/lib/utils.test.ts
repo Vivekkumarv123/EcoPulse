@@ -9,13 +9,15 @@ import {
   saveToStorage,
   generateUuid,
   STORAGE_VERSION,
-  decrypt
+  decrypt,
+  storageRateLimiter
 } from "./utils";
 import { axe } from "vitest-axe";
 import { z } from "zod";
 describe("Utility Suite", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    storageRateLimiter.reset();
     vi.restoreAllMocks();
   });
 
