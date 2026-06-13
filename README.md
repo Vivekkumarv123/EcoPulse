@@ -8,6 +8,11 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-%2338B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Vitest](https://img.shields.io/badge/Vitest-%23424A54.svg?logo=vitest&logoColor=%2366E8A3)](https://vitest.dev/)
 [![Zod](https://img.shields.io/badge/Zod-%231E293B.svg?logo=zod&logoColor=%236E7DFA)](https://zod.dev/)
+[![Lint](https://github.com/Vivekkumarv123/EcoPulse/actions/workflows/lint.yml/badge.svg)](https://github.com/Vivekkumarv123/EcoPulse/actions/workflows/lint.yml)
+[![Tests](https://github.com/Vivekkumarv123/EcoPulse/actions/workflows/test.yml/badge.svg)](https://github.com/Vivekkumarv123/EcoPulse/actions/workflows/test.yml)
+[![Security](https://github.com/Vivekkumarv123/EcoPulse/actions/workflows/security.yml/badge.svg)](https://github.com/Vivekkumarv123/EcoPulse/actions/workflows/security.yml)
+
+Continuous integration is provided by GitHub Actions, validating linting, type checking, testing, coverage, and security audits.
 
 ## Problem Statement
 

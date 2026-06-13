@@ -22,7 +22,8 @@ const eslintConfig = [
       "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "security/detect-object-injection": "off"
+      "security/detect-object-injection": "off",
+      "complexity": ["error", { "max": 15 }]
     }
   }
 ];
