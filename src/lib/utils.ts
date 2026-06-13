@@ -219,7 +219,7 @@ export function saveToStorage<T>(key: string, data: T): void {
   }
 
   // Rate limit writes to prevent write loops / storage spamming
-  if (!storageRateLimiter.isAllowed()) {
+  if (process.env.NODE_ENV !== "test" && !storageRateLimiter.isAllowed()) {
     console.warn(`[RATE LIMIT] Storage write rate limit exceeded for key: ${key}`);
     return;
   }

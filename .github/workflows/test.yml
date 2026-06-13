@@ -29,7 +29,7 @@ jobs:
         run: npm run type-check
 
       - name: Run tests
-        run: npm test --silent
+        run: npm run test
 
       - name: Run coverage
         run: npm run test:coverage
