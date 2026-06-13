@@ -9,18 +9,14 @@ import type { CarbonEntry } from "@/types";
  * @constant
  */
 export const MULTIPLIER_DEFAULTS: Record<CarbonCategory, string> = {
-  "transport": "car",
-  "food": "balanced",
-  "energy": "electricity",
-  "waste": "landfill"
+  transport: "car",
+  food: "balanced",
+  energy: "electricity",
+  waste: "landfill"
 } as const;
 
 /**
  * Memoized cache of multipliers for each carbon category.
- * Enables O(1) lookup during carbon calculations.
- *
- * @constant
- * @performance Precomputed cache reduces repeated lookups by ~35%
  */
 export const MULTIPLIER_CACHE = new Map<CarbonCategory, Record<string, number>>([
   ["transport", CARBON_MULTIPLIERS.transport],
@@ -31,35 +27,34 @@ export const MULTIPLIER_CACHE = new Map<CarbonCategory, Record<string, number>>(
 
 /**
  * Calculates carbon entry with memoized multiplier cache.
- * @optimized Uses cached multiplier lookups with preset defaults
- * Time Complexity: O(1) average case with cache
- * Space Complexity: O(1)
  */
-export function calculateEntryCarbon(category: CarbonCategory, value: number, option?: string): number {
+export function calculateEntryCarbon(
+  category: CarbonCategory,
+  value: number,
+  option?: string
+): number {
   const multipliers = MULTIPLIER_CACHE.get(category);
   if (!multipliers) return 0;
 
   const cleanOption = option?.trim().toLowerCase();
   const defaultKey = MULTIPLIER_DEFAULTS[category];
-  const factor = (cleanOption && cleanOption in multipliers)
-    ? multipliers[cleanOption as keyof typeof multipliers]
-    : multipliers[defaultKey as keyof typeof multipliers];
+  const factor =
+    cleanOption && cleanOption in multipliers
+      ? multipliers[cleanOption as keyof typeof multipliers]
+      : multipliers[defaultKey as keyof typeof multipliers];
 
   // Guard against undefined factor (should not happen with valid data, but type-safe)
   if (factor === undefined) return 0;
 
-  // Memory: Optimize precision with single toFixed call
   return Number((value * factor).toFixed(2));
 }
 
 /**
  * Computes carbon breakdown by category.
- * @optimized Uses accumulator pattern (O(1) memory per category)
- * Time Complexity: O(N) where N is number of entries
- * Space Complexity: O(1)
+ *
+ * @param entries Array of carbon entries to aggregate.
  */
 export function computeBreakdown(entries: readonly CarbonEntry[]) {
-  // Memory: Single accumulator object instead of separate variables
   const breakdown = {
     transport: 0,
     food: 0,
@@ -67,14 +62,12 @@ export function computeBreakdown(entries: readonly CarbonEntry[]) {
     waste: 0
   };
 
-  // Performance: Single pass through entries
   for (const entry of entries) {
     if (entry.category in breakdown) {
       breakdown[entry.category as keyof typeof breakdown] += entry.carbonValue;
     }
   }
 
-  // Precision: Single precision pass
   for (const key in breakdown) {
     breakdown[key as keyof typeof breakdown] = Number(
       breakdown[key as keyof typeof breakdown].toFixed(2)
@@ -82,7 +75,9 @@ export function computeBreakdown(entries: readonly CarbonEntry[]) {
   }
 
   const total = Number(
-    Object.values(breakdown).reduce((sum, val) => sum + val, 0).toFixed(2)
+    Object.values(breakdown)
+      .reduce((sum, val) => sum + val, 0)
+      .toFixed(2)
   );
 
   return {
@@ -93,14 +88,10 @@ export function computeBreakdown(entries: readonly CarbonEntry[]) {
 
 /**
  * Computes percentage breakdown with zero-division safety.
- * @optimized Early return for zero total
- * Time Complexity: O(1)
- * Space Complexity: O(1)
  */
 export function percentageBreakdown(breakdown: ReturnType<typeof computeBreakdown>) {
   const { total } = breakdown;
 
-  // Memory: Early return to avoid unnecessary computations
   if (total === 0) {
     return {
       transport: 0,
@@ -120,7 +111,6 @@ export function percentageBreakdown(breakdown: ReturnType<typeof computeBreakdow
   } as const;
 }
 
-// Performance: Precomputed rating thresholds
 const RATING_THRESHOLDS = [
   { max: 50, label: "Excellent" as const, score: 95 },
   { max: 150, label: "Good" as const, score: 80 },
@@ -131,9 +121,6 @@ const RATING_THRESHOLDS = [
 
 /**
  * Calculates sustainability rating based on total carbon.
- * @optimized Uses precomputed thresholds array
- * Time Complexity: O(1) with early termination
- * Space Complexity: O(1)
  */
 export function sustainabilityRating(totalKg: number) {
   for (const { max, label, score } of RATING_THRESHOLDS) {

@@ -31,7 +31,14 @@ export function ChallengesPanel() {
     const cleanDescription = sanitizeText(description || "");
     const now = new Date().toISOString();
     const id = generateUuid();
-    const challenge = { id, title: cleanTitle, description: cleanDescription, durationDays, completed: false, createdAt: now };
+    const challenge = {
+      id,
+      title: cleanTitle,
+      description: cleanDescription,
+      durationDays,
+      completed: false,
+      createdAt: now
+    };
 
     const validation = ChallengeSchema.safeParse(challenge);
     if (!validation.success) {
@@ -47,10 +54,12 @@ export function ChallengesPanel() {
   };
 
   return (
-    <section aria-labelledby="challenges" className="mt-4 card fade-in">
-      <h2 id="challenges" className="text-lg font-medium text-slate-100">Challenges</h2>
+    <section aria-labelledby="challenges" className="card fade-in mt-4">
+      <h2 id="challenges" className="text-lg font-medium text-slate-100">
+        Challenges
+      </h2>
 
-      <form onSubmit={onCreate} className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+      <form onSubmit={onCreate} className="mt-3 grid grid-cols-1 items-end gap-4 sm:grid-cols-3">
         <FormField
           id="challenge-title"
           label="Challenge title"
@@ -81,17 +90,32 @@ export function ChallengesPanel() {
         </div>
       </form>
 
-      <ul className="mt-4 space-y-3">
-        {challengeError && <div role="alert" className="text-sm text-rose-500">{challengeError}</div>}
-      {challenges.map((c) => (
-          <li key={c.id} className="flex items-center justify-between p-3 border border-[rgba(255,255,255,0.02)] rounded">
+      <ul className="mt-4 space-y-3" aria-label="Challenges list">
+        {challengeError && (
+          <div role="alert" aria-live="assertive" className="text-sm text-rose-500">
+            {challengeError}
+          </div>
+        )}
+        {challenges.map((c) => (
+          <li
+            key={c.id}
+            className="flex items-center justify-between rounded border border-[rgba(255,255,255,0.02)] p-3"
+          >
             <div>
               <div className="text-sm font-medium text-slate-100">{c.title}</div>
-              <div className="text-xs text-slate-400">{c.durationDays} days • {c.completed ? 'Completed' : 'Active'}</div>
+              <div className="text-xs text-slate-400">
+                {c.durationDays} days • {c.completed ? "Completed" : "Active"}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {!c.completed && (
-                <button onClick={() => completeChallenge(c.id)} className="rounded px-2 py-1 border bg-[rgba(16,185,129,0.08)] text-emerald-300">Complete</button>
+                <button
+                  onClick={() => completeChallenge(c.id)}
+                  aria-label={`Complete challenge: ${c.title}`}
+                  className="rounded border bg-[rgba(16,185,129,0.08)] px-2 py-1 text-emerald-300"
+                >
+                  Complete
+                </button>
               )}
               {c.completed && <span className="text-xs text-emerald-300">Done</span>}
             </div>

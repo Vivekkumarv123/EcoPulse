@@ -92,6 +92,11 @@ EcoPulse is designed for secure local-first usage:
 - **Prototype Pollution Protection** in localStorage parsing.
 - **Safe Storage Parsing** with versioned envelopes.
 - **Corruption Recovery** by replacing invalid payloads with defaults.
+- **LocalStorage Rate Limiting** to cap writes and prevent disk/memory exhaustion.
+- **LocalStorage Obfuscation & Encryption** via client-side symmetric algorithm.
+- **Modification Audit Logging** printed for all state dispatch mutations.
+- **CORS Policy Hardening** (COOP, COEP, CORP) to isolate the document.
+- **Subresource Integrity (SRI)** enforcing script tag checksum validation.
 
 ## Code Quality
 
@@ -145,7 +150,7 @@ EcoPulse is validated with an automated testing pipeline:
 
 ### Current Test Coverage
 
-- **185+ tests**
+- **190+ tests**
 - **Coverage enforcement** under `vitest run --coverage`
 - **Automated validation** via CI-ready scripts
 

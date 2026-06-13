@@ -9,7 +9,6 @@ import { StorageEnvelopeSchema } from "./schemas";
  */
 export const STORAGE_VERSION = 1;
 
-// Performance: Precompute HTML escape map (reduces memory allocations)
 const HTML_ESCAPE_MAP = new Map<string, string>([
   ["&", "&amp;"],
   ["<", "&lt;"],
@@ -19,36 +18,26 @@ const HTML_ESCAPE_MAP = new Map<string, string>([
   ["/", "&#x2F;"]
 ] as const);
 
-// Performance: Regex pattern for HTML escape detection (single pass)
 const HTML_ESCAPE_REGEX = /[&<>"'\/]/g;
 
-// Performance: Cache for dangerous keys (memory: reduces object allocation)
 const DANGEROUS_KEYS_SET = new Set(["__proto__", "constructor", "prototype"]);
 
 /**
  * Merges Tailwind classes dynamically with clsx resolution.
- * @optimized No changes needed - already optimal
  */
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
 /**
- * Purpose: Escapes active HTML characters to prevent XSS injection.
- * @optimized Uses single-pass regex instead of chained replaces
- * Time Complexity: O(N) where N is the length of the string.
- * Space Complexity: O(M) where M is the count of escapable characters.
- * Performance: ~40% faster than chained replace() calls
+ * Escapes active HTML characters to prevent XSS injection.
  */
 export function escapeHtml(text: string): string {
   return text.replace(HTML_ESCAPE_REGEX, (char) => HTML_ESCAPE_MAP.get(char) ?? char);
 }
 
 /**
- * Purpose: Trims whitespace and HTML-escapes strings to secure user text.
- * @optimized Single trim call (better than multiple)
- * Time Complexity: O(N) where N is the length of the input string.
- * Space Complexity: O(N).
+ * Trims whitespace and HTML-escapes strings to secure user text.
  */
 export function sanitizeText(text: string): string {
   const trimmed = text.trim();
@@ -56,11 +45,7 @@ export function sanitizeText(text: string): string {
 }
 
 /**
- * Purpose: Recursively cleans objects to remove prototype pollution keys (__proto__, constructor, prototype).
- * @optimized Uses Set instead of array for O(1) lookups and faster iteration
- * Time Complexity: O(V + E) where V is the number of keys and E is nesting levels.
- * Space Complexity: O(D) where D is maximum recursion nesting depth.
- * Performance: ~35% faster with Set-based dangerous key detection
+ * Recursively cleans objects to remove prototype pollution keys (__proto__, constructor, prototype).
  */
 export function stripDangerousKeys(obj: unknown): unknown {
   if (obj === null || typeof obj !== "object") {
@@ -68,14 +53,12 @@ export function stripDangerousKeys(obj: unknown): unknown {
   }
 
   if (Array.isArray(obj)) {
-    // Memory: Use map instead of forEach for better memory locality
     return obj.map((item) => stripDangerousKeys(item));
   }
 
   const cleanObj: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    // Memory: Set lookup is O(1) and cached at module level
     if (!DANGEROUS_KEYS_SET.has(key)) {
       cleanObj[key] = stripDangerousKeys(value);
     }
@@ -85,9 +68,7 @@ export function stripDangerousKeys(obj: unknown): unknown {
 }
 
 /**
- * Purpose: Parses JSON strings safely while stripping prototype pollution vectors.
- * Time Complexity: O(N) where N is the string length.
- * Space Complexity: O(N).
+ * Parses JSON strings safely while stripping prototype pollution vectors.
  */
 export function safeJsonParse(jsonString: string): unknown {
   try {
@@ -99,9 +80,88 @@ export function safeJsonParse(jsonString: string): unknown {
 }
 
 /**
- * Purpose: Fetches, parses, and validates localStorage entries with auto-recovery/fallback and version checks.
- * Time Complexity: O(N) where N is the length of the string in localStorage.
- * Space Complexity: O(N).
+ * Simple key-based encryption for client-side storage obfuscation.
+ */
+export function encrypt(text: string): string {
+  const key = "ecopulse-secret-key-12345";
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    const charCode = text.charCodeAt(i);
+    const keyCode = key.charCodeAt(i % key.length);
+    result += String.fromCharCode(charCode ^ keyCode);
+  }
+  return btoa(encodeURIComponent(result));
+}
+
+/**
+ * Decrypts a previously encrypted string. Returns empty string if failed.
+ */
+export function decrypt(cipherText: string): string {
+  const key = "ecopulse-secret-key-12345";
+  try {
+    const decoded = decodeURIComponent(atob(cipherText));
+    let result = "";
+    for (let i = 0; i < decoded.length; i++) {
+      const charCode = decoded.charCodeAt(i);
+      const keyCode = key.charCodeAt(i % key.length);
+      result += String.fromCharCode(charCode ^ keyCode);
+    }
+    return result;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Simple rate limiter using sliding window approach.
+ * @security Prevents abuse and DoS attacks
+ */
+export class RateLimiter {
+  private readonly timestamps: number[] = [];
+  private readonly maxRequests: number;
+  private readonly windowMs: number;
+
+  constructor(maxRequests: number, windowMs: number) {
+    this.maxRequests = maxRequests;
+    this.windowMs = windowMs;
+  }
+
+  isAllowed(): boolean {
+    const now = Date.now();
+    const cutoff = now - this.windowMs;
+
+    while (this.timestamps.length > 0 && this.timestamps[0]! < cutoff) {
+      this.timestamps.shift();
+    }
+
+    if (this.timestamps.length < this.maxRequests) {
+      this.timestamps.push(now);
+      return true;
+    }
+
+    return false;
+  }
+
+  reset(): void {
+    this.timestamps.length = 0;
+  }
+}
+
+/**
+ * Module-level rate limiter for local storage write operations.
+ */
+export const storageRateLimiter = new RateLimiter(100, 10000); // Max 100 writes per 10 seconds
+
+/**
+ * Logs data modifications for audit trails.
+ */
+export function logAuditAction(actionName: string, details?: unknown): void {
+  const timestamp = new Date().toISOString();
+  console.log(`[AUDIT LOG] [${timestamp}] Action: ${actionName}`, details ? JSON.stringify(details) : "");
+}
+
+/**
+ * Fetches, parses, and validates localStorage entries with auto-recovery/fallback and version checks.
  */
 export function safeStorageParser<T>(key: string, schema: z.ZodType<T>, defaultValue: T): T {
   if (typeof window === "undefined" || !window.localStorage) {
@@ -113,7 +173,13 @@ export function safeStorageParser<T>(key: string, schema: z.ZodType<T>, defaultV
     return defaultValue;
   }
 
-  const parsedJson = safeJsonParse(rawValue);
+  // Try decrypting. If it fails (e.g. legacy plain JSON), fall back to raw value.
+  let decrypted = decrypt(rawValue);
+  if (!decrypted) {
+    decrypted = rawValue;
+  }
+
+  const parsedJson = safeJsonParse(decrypted);
   if (!parsedJson) {
     // Corrupted storage: rewrite with default value
     saveToStorage(key, defaultValue);
@@ -145,12 +211,16 @@ export function safeStorageParser<T>(key: string, schema: z.ZodType<T>, defaultV
 }
 
 /**
- * Purpose: Safely packages data inside a StorageEnvelope and writes it to localStorage.
- * Time Complexity: O(N) where N is the length of stringified object.
- * Space Complexity: O(N).
+ * Safely packages data inside a StorageEnvelope and writes it to localStorage.
  */
 export function saveToStorage<T>(key: string, data: T): void {
   if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+
+  // Rate limit writes to prevent write loops / storage spamming
+  if (!storageRateLimiter.isAllowed()) {
+    console.warn(`[RATE LIMIT] Storage write rate limit exceeded for key: ${key}`);
     return;
   }
 
@@ -160,7 +230,9 @@ export function saveToStorage<T>(key: string, data: T): void {
   };
 
   try {
-    window.localStorage.setItem(key, JSON.stringify(envelope));
+    const serialized = JSON.stringify(envelope);
+    const encrypted = encrypt(serialized);
+    window.localStorage.setItem(key, encrypted);
   } catch (error) {
     // Storage quota exceeded or blocked; silent fail in helper (handled at hook tier)
     void error;
@@ -198,10 +270,11 @@ export function generateUuid(): string {
 /**
  * Validates input meets security requirements before processing.
  * @security Prevents malicious input vectors
- * Time Complexity: O(N) where N is the length of input
- * Space Complexity: O(1)
  */
-export function validateSecureInput(input: string, maxLength = 1000): { valid: boolean; error?: string } {
+export function validateSecureInput(
+  input: string,
+  maxLength = 1000
+): { valid: boolean; error?: string } {
   if (typeof input !== "string") {
     return { valid: false, error: "Input must be a string" };
   }
@@ -218,40 +291,4 @@ export function validateSecureInput(input: string, maxLength = 1000): { valid: b
   return { valid: true };
 }
 
-/**
- * Simple rate limiter using sliding window approach.
- * @security Prevents abuse and DoS attacks
- * Time Complexity: O(1) amortized
- * Space Complexity: O(W) where W is window size
- */
-export class RateLimiter {
-  private readonly timestamps: number[] = [];
-  private readonly maxRequests: number;
-  private readonly windowMs: number;
 
-  constructor(maxRequests: number, windowMs: number) {
-    this.maxRequests = maxRequests;
-    this.windowMs = windowMs;
-  }
-
-  isAllowed(): boolean {
-    const now = Date.now();
-    const cutoff = now - this.windowMs;
-
-    // Memory: Remove old entries outside the window
-    while (this.timestamps.length > 0 && this.timestamps[0]! < cutoff) {
-      this.timestamps.shift();
-    }
-
-    if (this.timestamps.length < this.maxRequests) {
-      this.timestamps.push(now);
-      return true;
-    }
-
-    return false;
-  }
-
-  reset(): void {
-    this.timestamps.length = 0;
-  }
-}

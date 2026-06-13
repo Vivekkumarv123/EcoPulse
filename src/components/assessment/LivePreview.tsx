@@ -8,7 +8,7 @@
 export function LivePreview({ liveCarbon }: { liveCarbon: number }) {
   return (
     <div
-      className="mb-4 p-3 rounded bg-[rgba(16,185,129,0.08)] border border-[rgba(16,185,129,0.1)]"
+      className="mb-4 rounded border border-[rgba(16,185,129,0.1)] bg-[rgba(16,185,129,0.08)] p-3"
       role="status"
       aria-live="polite"
       aria-atomic="true"
@@ -19,4 +19,5 @@ export function LivePreview({ liveCarbon }: { liveCarbon: number }) {
   );
 }
 
-export default LivePreview;
+ 
+

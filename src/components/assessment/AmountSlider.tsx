@@ -21,8 +21,8 @@ export function AmountSlider({
 }) {
   return (
     <div className="mb-4">
-      <label htmlFor="amount-slider" className="block text-sm font-medium text-slate-300 mb-2">
-        Amount: <span className="text-emerald-300 font-semibold">{value}</span>
+      <label htmlFor="amount-slider" className="mb-2 block text-sm font-medium text-slate-300">
+        Amount: <span className="font-semibold text-emerald-300">{value}</span>
       </label>
       <input
         id="amount-slider"
@@ -35,9 +35,9 @@ export function AmountSlider({
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={value}
-        className="w-full h-2 bg-[rgba(255,255,255,0.05)] rounded cursor-pointer"
+        className="h-2 w-full cursor-pointer rounded bg-[rgba(255,255,255,0.05)]"
       />
-      <div className="flex justify-between text-xs text-slate-400 mt-1">
+      <div className="mt-1 flex justify-between text-xs text-slate-400">
         <span>{min}</span>
         <span>{max}</span>
       </div>
@@ -45,4 +45,4 @@ export function AmountSlider({
   );
 }
 
-export default AmountSlider;
+

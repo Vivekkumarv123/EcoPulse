@@ -25,8 +25,6 @@ const FormSchema = z.object({
  * Extracting this logic makes the UI component focused on rendering only.
  *
  * @returns {object} state and handlers required by `AssessmentForm`
- * Time Complexity: see individual handlers (O(1) for main ops, O(N) for sanitization)
- * Space Complexity: O(1) additional per hook instance
  */
 export function useAssessmentForm() {
   const dispatch = useContext(FootprintDispatchContext);
@@ -39,78 +37,95 @@ export function useAssessmentForm() {
   const [option, setOption] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [liveCarbon, setLiveCarbon] = useState<number>(() => calculateEntryCarbon(category, FORM_DEFAULTS.INITIAL_VALUE));
+  const [liveCarbon, setLiveCarbon] = useState<number>(() =>
+    calculateEntryCarbon(category, FORM_DEFAULTS.INITIAL_VALUE)
+  );
 
-  const onSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const onSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
 
-    const descValidation = validateSecureInput(description, FORM_LIMITS.DESCRIPTION_MAX);
-    if (!descValidation.valid) {
-      setError(descValidation.error ?? "Invalid description");
-      return;
-    }
+      const descValidation = validateSecureInput(description, FORM_LIMITS.DESCRIPTION_MAX);
+      if (!descValidation.valid) {
+        setError(descValidation.error ?? "Invalid description");
+        return;
+      }
 
-    const optionValidation = validateSecureInput(option, FORM_LIMITS.OPTION_MAX);
-    if (!optionValidation.valid) {
-      setError(optionValidation.error ?? "Invalid option");
-      return;
-    }
+      const optionValidation = validateSecureInput(option, FORM_LIMITS.OPTION_MAX);
+      if (!optionValidation.valid) {
+        setError(optionValidation.error ?? "Invalid option");
+        return;
+      }
 
-    const parsed = FormSchema.safeParse({ category, value, option, description });
-    if (!parsed.success) {
-      setError(parsed.error.errors.map((x) => x.message).join(", "));
-      return;
-    }
+      const parsed = FormSchema.safeParse({ category, value, option, description });
+      if (!parsed.success) {
+        setError(parsed.error.errors.map((x) => x.message).join(", "));
+        return;
+      }
 
-    const carbonValue = calculateEntryCarbon(category, value, option);
+      const carbonValue = calculateEntryCarbon(category, value, option);
 
-    const entry = {
-      id: generateUuid(),
-      category,
-      value,
-      description: sanitizeText(description ?? ""),
-      date: new Date().toISOString(),
-      carbonValue
-    } as const;
+      const entry = {
+        id: generateUuid(),
+        category,
+        value,
+        description: sanitizeText(description ?? ""),
+        date: new Date().toISOString(),
+        carbonValue
+      } as const;
 
-    const validated = CarbonEntrySchema.safeParse(entry);
-    if (!validated.success) {
-      setError("Invalid entry data");
-      return;
-    }
+      const validated = CarbonEntrySchema.safeParse(entry);
+      if (!validated.success) {
+        setError("Invalid entry data");
+        return;
+      }
 
-    dispatch.addEntry(validated.data as unknown as CarbonEntry);
-    router.push("/dashboard");
+      dispatch.addEntry(validated.data as unknown as CarbonEntry);
+      router.push("/dashboard");
 
-    // Reset
-    setValue(FORM_DEFAULTS.INITIAL_VALUE);
-    setOption("");
-    setDescription("");
-    setLiveCarbon(calculateEntryCarbon(category, FORM_DEFAULTS.INITIAL_VALUE, ""));
-  }, [category, value, option, description, dispatch, router]);
+      // Reset
+      setValue(FORM_DEFAULTS.INITIAL_VALUE);
+      setOption("");
+      setDescription("");
+      setLiveCarbon(calculateEntryCarbon(category, FORM_DEFAULTS.INITIAL_VALUE, ""));
+    },
+    [category, value, option, description, dispatch, router]
+  );
 
-  const onCategoryChange = useCallback((newCategory: CarbonCategory) => {
-    setCategory(newCategory);
-    setLiveCarbon(calculateEntryCarbon(newCategory, value, option));
-  }, [value, option]);
+  const onCategoryChange = useCallback(
+    (newCategory: CarbonCategory) => {
+      setCategory(newCategory);
+      setLiveCarbon(calculateEntryCarbon(newCategory, value, option));
+    },
+    [value, option]
+  );
 
-  const onPreset = useCallback((preset: { value: number; option?: string }) => {
-    setValue(preset.value);
-    const newOption = preset.option ?? "";
-    setOption(newOption);
-    setLiveCarbon(calculateEntryCarbon(category, preset.value, newOption));
-  }, [category]);
+  const onPreset = useCallback(
+    (preset: { value: number; option?: string }) => {
+      setValue(preset.value);
+      const newOption = preset.option ?? "";
+      setOption(newOption);
+      setLiveCarbon(calculateEntryCarbon(category, preset.value, newOption));
+    },
+    [category]
+  );
 
-  const onSlider = useCallback((v: number) => {
-    setValue(v);
-    setLiveCarbon(calculateEntryCarbon(category, v, option));
-  }, [category, option]);
+  const onSlider = useCallback(
+    (v: number) => {
+      setValue(v);
+      setLiveCarbon(calculateEntryCarbon(category, v, option));
+    },
+    [category, option]
+  );
 
-  const onOptionChange = useCallback((newOption: string) => {
-    setOption(newOption);
-    setLiveCarbon(calculateEntryCarbon(category, value, newOption));
-  }, [category, value]);
+  const onOptionChange = useCallback(
+    (newOption: string) => {
+      setOption(newOption);
+      setLiveCarbon(calculateEntryCarbon(category, value, newOption));
+    },
+    [category, value]
+  );
 
   const onDescriptionChange = useCallback((newDesc: string) => {
     const validation = validateSecureInput(newDesc, FORM_LIMITS.DESCRIPTION_MAX);

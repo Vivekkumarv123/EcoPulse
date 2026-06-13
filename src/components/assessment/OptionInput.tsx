@@ -7,10 +7,18 @@
  * @param props.onChange callback for changes
  * @param props.maxLength maximum allowed length
  */
-export function OptionInput({ value, onChange, maxLength }: { value: string; onChange: (v: string) => void; maxLength: number }) {
+export function OptionInput({
+  value,
+  onChange,
+  maxLength
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  maxLength: number;
+}) {
   return (
     <div className="mb-4">
-      <label htmlFor="option-input" className="block text-sm font-medium text-slate-300 mb-2">
+      <label htmlFor="option-input" className="mb-2 block text-sm font-medium text-slate-300">
         Option <span className="text-xs text-slate-500">(auto-filled by presets)</span>
       </label>
       <input
@@ -21,15 +29,15 @@ export function OptionInput({ value, onChange, maxLength }: { value: string; onC
         maxLength={maxLength}
         aria-label="Option input"
         aria-describedby="option-hint"
-        className="w-full rounded border border-[rgba(255,255,255,0.1)] px-3 py-2 bg-[rgba(255,255,255,0.02)] text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+        className="w-full rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-3 py-2 text-slate-200 placeholder-slate-500 transition-all focus:border-transparent focus:ring-2 focus:ring-emerald-500"
         placeholder="e.g., car, vegan, electricity"
       />
-      <p id="option-hint" className="text-xs text-slate-400 mt-1">
+      <p id="option-hint" className="mt-1 text-xs text-slate-400">
         Refines carbon calculation
       </p>
     </div>
   );
 }
 
-export default OptionInput;
+ 
 

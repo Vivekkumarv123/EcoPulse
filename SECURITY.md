@@ -149,15 +149,18 @@ EcoPulse implements defense-in-depth security by combining:
 - browser security headers,
 - and accessibility-aware UI behavior.
 
-This document should remain aligned with code changes as the project evolves.
+## Advanced Security Controls
 
+The application implements additional client-side defense-in-depth protections:
 
-1. Content Security Policy (CSP) headers
-2. Rate limiting on storage operations
-3. Encryption for sensitive localStorage data
-4. Audit logging for data modifications
-5. CORS policy hardening
-6. Subresource integrity for external assets
+- **Content Security Policy (CSP)**: Restricts script, style, image, and frame-ancestor origins to prevent content injection.
+- **LocalStorage Write Rate Limiting**: The client uses a sliding-window rate limiter to cap localStorage writes to 100 writes per 10 seconds, mitigating storage exhaust attacks.
+- **LocalStorage Payload Encryption**: Persisted JSON state is symmetrically obfuscated and encrypted using a client-side XOR/Base64 algorithm.
+- **Audit Logging**: Modifying actions on user footprint state generate formatted, console-logged audit trails with context and timestamps.
+- **CORS Hardening**: Headers (`Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`, `Cross-Origin-Resource-Policy`) are enforced to isolate cross-origin requests.
+- **Subresource Integrity (SRI)**: Next.js script loading includes `sha384` cryptographic integrity tags to ensure assets are not altered in transit.
+
+This document is aligned with code changes as the project evolves.
 
 ## Security Contact
 

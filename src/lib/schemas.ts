@@ -18,7 +18,13 @@ export const CarbonEntrySchema = z.object({
   id: z.string().uuid(),
   category: CarbonCategorySchema,
   value: z.number().nonnegative("Value must be a non-negative number"),
-  description: z.string().max(FORM_LIMITS.DESCRIPTION_MAX, `Description must be ${FORM_LIMITS.DESCRIPTION_MAX} characters or fewer`).trim(),
+  description: z
+    .string()
+    .max(
+      FORM_LIMITS.DESCRIPTION_MAX,
+      `Description must be ${FORM_LIMITS.DESCRIPTION_MAX} characters or fewer`
+    )
+    .trim(),
   date: z.string().datetime("Date must be a valid ISO 8601 datetime string"),
   carbonValue: z.number().nonnegative("Carbon value must be a non-negative number")
 });

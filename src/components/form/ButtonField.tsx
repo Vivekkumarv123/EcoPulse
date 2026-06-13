@@ -24,7 +24,7 @@ export function ButtonField({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="w-full rounded bg-emerald-600 text-white px-3 py-2 hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full rounded bg-emerald-600 px-3 py-2 text-white transition hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {label}
     </button>

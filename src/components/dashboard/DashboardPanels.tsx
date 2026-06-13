@@ -10,15 +10,15 @@ import { ChallengesPanel } from "@/components/challenges/ChallengesPanel";
  */
 export function DashboardPanels() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="card p-1.5 border-white/[0.03] bg-white/[0.005] rounded-3xl">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="card rounded-3xl border-white/[0.03] bg-white/[0.005] p-1.5">
         <GoalsPanel />
       </div>
-      <div className="card p-1.5 border-white/[0.03] bg-white/[0.005] rounded-3xl">
+      <div className="card rounded-3xl border-white/[0.03] bg-white/[0.005] p-1.5">
         <ChallengesPanel />
       </div>
     </div>
   );
 }
 
-export default DashboardPanels;
+

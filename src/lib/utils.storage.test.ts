@@ -1,5 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { safeJsonParse, stripDangerousKeys, safeStorageParser, saveToStorage, STORAGE_VERSION, generateUuid } from "./utils";
+import {
+  safeJsonParse,
+  stripDangerousKeys,
+  safeStorageParser,
+  saveToStorage,
+  STORAGE_VERSION,
+  generateUuid,
+  encrypt,
+  decrypt,
+  storageRateLimiter,
+  logAuditAction
+} from "./utils";
 import { z } from "zod";
 
 describe("utils storage and safety helpers", () => {
@@ -7,6 +18,37 @@ describe("utils storage and safety helpers", () => {
     vi.restoreAllMocks();
     // Ensure clean localStorage
     window.localStorage.clear();
+    storageRateLimiter.reset();
+  });
+
+  it("encrypt and decrypt work correctly", () => {
+    const originalText = '{"version":1,"payload":{"test":"data"}}';
+    const encrypted = encrypt(originalText);
+    expect(encrypted).not.toBe(originalText);
+    const decrypted = decrypt(encrypted);
+    expect(decrypted).toBe(originalText);
+  });
+
+  it("decrypt returns empty string on invalid cipher text", () => {
+    expect(decrypt("invalid-base64-!!!")).toBe("");
+  });
+
+  it("storageRateLimiter limits writes after maximum threshold", () => {
+    // We configured rate limiter for 100 requests. Let's make 101 writes.
+    for (let i = 0; i < 100; i++) {
+      expect(storageRateLimiter.isAllowed()).toBe(true);
+    }
+    expect(storageRateLimiter.isAllowed()).toBe(false);
+  });
+
+  it("logAuditAction logs to console", () => {
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    logAuditAction("TEST_ACTION", { data: 123 });
+    expect(consoleSpy).toHaveBeenCalled();
+    expect(consoleSpy.mock.calls[0]![0]).toContain("[AUDIT LOG]");
+    expect(consoleSpy.mock.calls[0]![0]).toContain("Action: TEST_ACTION");
+    expect(consoleSpy.mock.calls[0]![1]).toContain('{"data":123}');
+    consoleSpy.mockRestore();
   });
 
   it("safeJsonParse returns null for invalid JSON and parses valid JSON", () => {
@@ -15,7 +57,11 @@ describe("utils storage and safety helpers", () => {
   });
 
   it("stripDangerousKeys removes prototype pollution vectors", () => {
-    const polluted: Record<string, unknown> = { good: 1, __proto__: { polluted: true }, nested: { constructor: { evil: true }, ok: 2 } };
+    const polluted: Record<string, unknown> = {
+      good: 1,
+      __proto__: { polluted: true },
+      nested: { constructor: { evil: true }, ok: 2 }
+    };
     const cleaned = stripDangerousKeys(polluted) as Record<string, unknown>;
     expect(cleaned.good).toBe(1);
     // Ensure prototype pollution did not inject properties onto the prototype
@@ -33,7 +79,10 @@ describe("utils storage and safety helpers", () => {
     const res = safeStorageParser(key, schema, [1, 2, 3]);
 
     expect(res).toEqual([1, 2, 3]);
-    const written = JSON.parse(String(window.localStorage.getItem(key))) as Record<string, unknown>;
+    const rawStored = window.localStorage.getItem(key);
+    expect(rawStored).not.toBeNull();
+    const decrypted = decrypt(rawStored as string);
+    const written = JSON.parse(decrypted) as Record<string, unknown>;
     expect(written.version).toBe(STORAGE_VERSION);
     expect(Array.isArray(written.payload)).toBe(true);
   });
@@ -47,14 +96,19 @@ describe("utils storage and safety helpers", () => {
     const res = safeStorageParser(key, schema, [9]);
 
     expect(res).toEqual([9]);
-    const written = JSON.parse(String(window.localStorage.getItem(key))) as Record<string, unknown>;
+    const rawStored = window.localStorage.getItem(key);
+    expect(rawStored).not.toBeNull();
+    const decrypted = decrypt(rawStored as string);
+    const written = JSON.parse(decrypted) as Record<string, unknown>;
     expect(written.version).toBe(STORAGE_VERSION);
   });
 
   it("saveToStorage swallows storage exceptions", () => {
     const key = "quota_test";
     const original = window.localStorage.setItem;
-    window.localStorage.setItem = ((): never => { throw new Error("quota"); }) as (key: string, value: string) => void;
+    window.localStorage.setItem = ((): never => {
+      throw new Error("quota");
+    }) as (key: string, value: string) => void;
     expect(() => saveToStorage(key, { a: 1 })).not.toThrow();
     // restore
     window.localStorage.setItem = original;

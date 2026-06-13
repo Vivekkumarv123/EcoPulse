@@ -4,12 +4,12 @@ import React, { useMemo } from "react";
 import { CarbonCategory } from "@/types";
 import { useAssessmentForm } from "@/hooks/useAssessmentForm";
 import { FORM_LIMITS } from "@/lib/formConstants";
-import CategoryTabs from "./CategoryTabs";
-import PresetsPanel from "./PresetsPanel";
-import AmountSlider from "./AmountSlider";
-import OptionInput from "./OptionInput";
-import DescriptionInput from "./DescriptionInput";
-import LivePreview from "./LivePreview";
+import { CategoryTabs } from "./CategoryTabs";
+import { PresetsPanel } from "./PresetsPanel";
+import { AmountSlider } from "./AmountSlider";
+import { OptionInput } from "./OptionInput";
+import { DescriptionInput } from "./DescriptionInput";
+import { LivePreview } from "./LivePreview";
 
 // Performance: Memoized presets to avoid recalculation
 const PRESETS: Record<CarbonCategory, readonly { readonly label: string; readonly value: number; readonly option?: string }[]> = {
@@ -107,5 +107,3 @@ function AssessmentFormComponent() {
 
 // Performance: Memoize component to prevent unnecessary re-renders
 export const AssessmentForm = React.memo(AssessmentFormComponent);
-
-

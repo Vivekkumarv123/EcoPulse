@@ -2,15 +2,19 @@
 
 import React, { createContext, useState, useCallback, useMemo, useEffect } from "react";
 import { CarbonEntry, CarbonTarget, UserSettings, Goal, Challenge } from "@/types";
-import { safeStorageParser, saveToStorage } from "@/lib/utils";
-import { CarbonEntrySchema, CarbonTargetSchema, UserSettingsSchema, GoalSchema, ChallengeSchema } from "@/lib/schemas";
+import { safeStorageParser, saveToStorage, logAuditAction } from "@/lib/utils";
+import {
+  CarbonEntrySchema,
+  CarbonTargetSchema,
+  UserSettingsSchema,
+  GoalSchema,
+  ChallengeSchema
+} from "@/lib/schemas";
 import { z } from "zod";
 import { INITIAL_USER_SETTINGS, DEFAULT_TARGETS } from "@/lib/constants";
 
 function usePersistentState<T>(key: string, schema: z.ZodType<T>, defaultValue: T) {
-  const [state, setState] = useState<T>(() =>
-    safeStorageParser(key, schema, defaultValue)
-  );
+  const [state, setState] = useState<T>(() => safeStorageParser(key, schema, defaultValue));
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -93,31 +97,52 @@ const ChallengesSchema = z.array(ChallengeSchema);
 export function AppProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [entries, setEntries] = usePersistentState(ENTRIES_KEY, EntriesSchema, []);
   const [targets, setTargets] = usePersistentState(TARGETS_KEY, TargetsSchema, defaultTargetsList);
-  const [settings, setSettings] = usePersistentState(SETTINGS_KEY, UserSettingsSchema, INITIAL_USER_SETTINGS);
+  const [settings, setSettings] = usePersistentState(
+    SETTINGS_KEY,
+    UserSettingsSchema,
+    INITIAL_USER_SETTINGS
+  );
   const [goals, setGoals] = usePersistentState(GOALS_KEY, GoalsSchema, []);
   const [challenges, setChallenges] = usePersistentState(CHALLENGES_KEY, ChallengesSchema, []);
 
-  const addEntry = useCallback((entry: CarbonEntry) => {
-    setEntries((prev) => [entry, ...prev]);
-  }, [setEntries]);
+  const addEntry = useCallback(
+    (entry: CarbonEntry) => {
+      logAuditAction("ADD_ENTRY", { id: entry.id, category: entry.category });
+      setEntries((prev) => [entry, ...prev]);
+    },
+    [setEntries]
+  );
 
-  const deleteEntry = useCallback((id: string) => {
-    setEntries((prev) => prev.filter((item) => item.id !== id));
-  }, [setEntries]);
+  const deleteEntry = useCallback(
+    (id: string) => {
+      logAuditAction("DELETE_ENTRY", { id });
+      setEntries((prev) => prev.filter((item) => item.id !== id));
+    },
+    [setEntries]
+  );
 
-  const updateTarget = useCallback((target: CarbonTarget) => {
-    setTargets((prev) =>
-      prev.map((item) =>
-        item.category === target.category && item.interval === target.interval ? target : item
-      )
-    );
-  }, [setTargets]);
+  const updateTarget = useCallback(
+    (target: CarbonTarget) => {
+      logAuditAction("UPDATE_TARGET", { category: target.category, targetValue: target.targetValue });
+      setTargets((prev) =>
+        prev.map((item) =>
+          item.category === target.category && item.interval === target.interval ? target : item
+        )
+      );
+    },
+    [setTargets]
+  );
 
-  const updateSettings = useCallback((newSettings: Partial<UserSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
-  }, [setSettings]);
+  const updateSettings = useCallback(
+    (newSettings: Partial<UserSettings>) => {
+      logAuditAction("UPDATE_SETTINGS", newSettings);
+      setSettings((prev) => ({ ...prev, ...newSettings }));
+    },
+    [setSettings]
+  );
 
   const resetAll = useCallback(() => {
+    logAuditAction("RESET_ALL");
     setEntries([]);
     setTargets(defaultTargetsList);
     setSettings(INITIAL_USER_SETTINGS);
@@ -125,34 +150,66 @@ export function AppProvider({ children }: Readonly<{ children: React.ReactNode }
     setChallenges([]);
   }, [setEntries, setTargets, setSettings, setGoals, setChallenges]);
 
-  const addGoal = useCallback((goal: Goal) => {
-    setGoals((prev) => [goal, ...prev]);
-  }, [setGoals]);
+  const addGoal = useCallback(
+    (goal: Goal) => {
+      logAuditAction("ADD_GOAL", { id: goal.id, title: goal.title });
+      setGoals((prev) => [goal, ...prev]);
+    },
+    [setGoals]
+  );
 
-  const toggleGoalActive = useCallback((id: string) => {
-    setGoals((prev) => prev.map((g) => (g.id === id ? { ...g, active: !g.active } : g)));
-  }, [setGoals]);
+  const toggleGoalActive = useCallback(
+    (id: string) => {
+      logAuditAction("TOGGLE_GOAL_ACTIVE", { id });
+      setGoals((prev) => prev.map((g) => (g.id === id ? { ...g, active: !g.active } : g)));
+    },
+    [setGoals]
+  );
 
-  const addChallenge = useCallback((challenge: Challenge) => {
-    setChallenges((prev) => [challenge, ...prev]);
-  }, [setChallenges]);
+  const addChallenge = useCallback(
+    (challenge: Challenge) => {
+      logAuditAction("ADD_CHALLENGE", { id: challenge.id, title: challenge.title });
+      setChallenges((prev) => [challenge, ...prev]);
+    },
+    [setChallenges]
+  );
 
-  const completeChallenge = useCallback((id: string) => {
-    setChallenges((prev) => prev.map((c) => (c.id === id ? { ...c, completed: true } : c)));
-  }, [setChallenges]);
+  const completeChallenge = useCallback(
+    (id: string) => {
+      logAuditAction("COMPLETE_CHALLENGE", { id });
+      setChallenges((prev) => prev.map((c) => (c.id === id ? { ...c, completed: true } : c)));
+    },
+    [setChallenges]
+  );
 
-  const stateWithExtras = useMemo<FootprintState>(() => ({ entries, targets, settings, goals, challenges }), [entries, targets, settings, goals, challenges]);
-  const dispatchVal = useMemo<FootprintDispatch>(() => ({
-    addEntry,
-    deleteEntry,
-    updateTarget,
-    updateSettings,
-    resetAll,
-    addGoal,
-    toggleGoalActive,
-    addChallenge,
-    completeChallenge
-  }), [addEntry, deleteEntry, updateTarget, updateSettings, resetAll, addGoal, toggleGoalActive, addChallenge, completeChallenge]);
+  const stateWithExtras = useMemo<FootprintState>(
+    () => ({ entries, targets, settings, goals, challenges }),
+    [entries, targets, settings, goals, challenges]
+  );
+  const dispatchVal = useMemo<FootprintDispatch>(
+    () => ({
+      addEntry,
+      deleteEntry,
+      updateTarget,
+      updateSettings,
+      resetAll,
+      addGoal,
+      toggleGoalActive,
+      addChallenge,
+      completeChallenge
+    }),
+    [
+      addEntry,
+      deleteEntry,
+      updateTarget,
+      updateSettings,
+      resetAll,
+      addGoal,
+      toggleGoalActive,
+      addChallenge,
+      completeChallenge
+    ]
+  );
 
   return (
     <FootprintStateContext.Provider value={stateWithExtras}>

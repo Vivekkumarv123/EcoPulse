@@ -47,7 +47,7 @@ export function FormField({
 }) {
   return (
     <div className={wrapperClassName}>
-      <label htmlFor={id} className="block text-xs font-medium text-slate-300 mb-1">
+      <label htmlFor={id} className="mb-1 block text-xs font-medium text-slate-300">
         {label}
       </label>
       <input
@@ -60,10 +60,13 @@ export function FormField({
         min={min}
         max={max}
         step={step}
-        className="w-full rounded border border-white/[0.08] bg-slate-950/10 text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+        aria-describedby={helpText ? `${id}-help` : undefined}
+        className="w-full rounded border border-white/[0.08] bg-slate-950/10 px-3 py-2 text-slate-200 transition focus:ring-2 focus:ring-emerald-500"
       />
       {helpText ? (
-        <p className="text-[11px] text-slate-500 mt-2">{helpText}</p>
+        <p id={`${id}-help`} className="mt-2 text-[11px] text-slate-500">
+          {helpText}
+        </p>
       ) : null}
     </div>
   );

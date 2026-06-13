@@ -8,7 +8,8 @@ import {
   safeStorageParser,
   saveToStorage,
   generateUuid,
-  STORAGE_VERSION
+  STORAGE_VERSION,
+  decrypt
 } from "./utils";
 import { axe } from "vitest-axe";
 import { z } from "zod";
@@ -136,7 +137,7 @@ describe("Utility Suite", () => {
 
       const rawStored = window.localStorage.getItem("corrupt-key");
       expect(rawStored).not.toBeNull();
-      const stored = JSON.parse(rawStored as string);
+      const stored = JSON.parse(decrypt(rawStored as string));
       expect(stored.payload).toEqual(defaultData);
       expect(stored.version).toBe(STORAGE_VERSION);
     });
@@ -152,13 +153,26 @@ describe("Utility Suite", () => {
       window.localStorage.setItem("version-key", JSON.stringify(oldEnvelope));
       const result = safeStorageParser("version-key", TestSchema, defaultData);
       expect(result).toEqual(defaultData);
+
+      const rawStored = window.localStorage.getItem("version-key");
+      expect(rawStored).not.toBeNull();
+      const stored = JSON.parse(decrypt(rawStored as string));
+      expect(stored.version).toBe(STORAGE_VERSION);
     });
 
     it("recovers if payload validation fails", () => {
-      const badEnvelope = { version: STORAGE_VERSION, payload: { username: 123, count: "not-int" } };
+      const badEnvelope = {
+        version: STORAGE_VERSION,
+        payload: { username: 123, count: "not-int" }
+      };
       window.localStorage.setItem("invalid-payload", JSON.stringify(badEnvelope));
       const result = safeStorageParser("invalid-payload", TestSchema, defaultData);
       expect(result).toEqual(defaultData);
+
+      const rawStored = window.localStorage.getItem("invalid-payload");
+      expect(rawStored).not.toBeNull();
+      const stored = JSON.parse(decrypt(rawStored as string));
+      expect(stored.version).toBe(STORAGE_VERSION);
     });
 
     it("returns valid payload if envelope, version, and schema match", () => {

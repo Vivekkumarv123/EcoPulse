@@ -31,7 +31,15 @@ export function GoalsPanel() {
     const cleanTitle = sanitizeText(title || "Untitled Goal");
     const now = new Date().toISOString();
     const id = generateUuid();
-    const goal: Goal = { id, title: cleanTitle, category, targetValue, progress: 0, active: true, createdAt: now };
+    const goal: Goal = {
+      id,
+      title: cleanTitle,
+      category,
+      targetValue,
+      progress: 0,
+      active: true,
+      createdAt: now
+    };
 
     const validation = GoalSchema.safeParse(goal);
     if (!validation.success) {
@@ -45,10 +53,12 @@ export function GoalsPanel() {
   };
 
   return (
-    <section aria-labelledby="goals" className="mt-4 card fade-in">
-      <h2 id="goals" className="text-lg font-medium">Goals</h2>
+    <section aria-labelledby="goals" className="card fade-in mt-4">
+      <h2 id="goals" className="text-lg font-medium">
+        Goals
+      </h2>
 
-      <form onSubmit={onCreate} className="mt-3 grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+      <form onSubmit={onCreate} className="mt-3 grid grid-cols-1 items-end gap-4 sm:grid-cols-4">
         <FormField
           id="goal-title"
           label="Goal title"
@@ -82,20 +92,39 @@ export function GoalsPanel() {
         </div>
       </form>
 
-      <ul className="mt-4 space-y-3">
-        {goalError && <div role="alert" className="text-sm text-rose-500">{goalError}</div>}
-      {goals.map((g) => (
-          <li key={g.id} className="flex items-center justify-between p-3 border border-[rgba(255,255,255,0.02)] rounded">
+      <ul className="mt-4 space-y-3" aria-label="Goals list">
+        {goalError && (
+          <div role="alert" aria-live="assertive" className="text-sm text-rose-500">
+            {goalError}
+          </div>
+        )}
+        {goals.map((g) => (
+          <li
+            key={g.id}
+            className="flex items-center justify-between rounded border border-[rgba(255,255,255,0.02)] p-3"
+          >
             <div className="flex-1">
               <div className="text-sm font-medium text-slate-100">{g.title}</div>
-              <div className="text-xs text-slate-400">{g.category} • Target {g.targetValue}</div>
-              <div className="mt-2 bg-[rgba(255,255,255,0.03)] rounded h-2 overflow-hidden">
-                <div style={{ width: `${Math.min(100, Math.max(0, g.progress))}%` }} className="h-2 bg-[rgba(16,185,129,0.9)]"></div>
+              <div className="text-xs text-slate-400">
+                {g.category} • Target {g.targetValue}
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded bg-[rgba(255,255,255,0.03)]">
+                <div
+                  style={{ width: `${Math.min(100, Math.max(0, g.progress))}%` }}
+                  className="h-2 bg-[rgba(16,185,129,0.9)]"
+                ></div>
               </div>
             </div>
-            <div className="flex flex-col items-end ml-4">
-              <button aria-pressed={g.active} onClick={() => toggleGoalActive(g.id)} className={`px-2 py-1 rounded text-xs ${g.active ? 'bg-[rgba(16,185,129,0.14)] text-emerald-300' : 'bg-[rgba(255,255,255,0.02)] text-slate-300'}`}>{g.active ? "Active" : "Inactive"}</button>
-              <div className="text-xs text-slate-400 mt-2">{g.progress}%</div>
+            <div className="ml-4 flex flex-col items-end">
+              <button
+                aria-pressed={g.active}
+                aria-label={`Toggle active state for goal: ${g.title}`}
+                onClick={() => toggleGoalActive(g.id)}
+                className={`rounded px-2 py-1 text-xs ${g.active ? "bg-[rgba(16,185,129,0.14)] text-emerald-300" : "bg-[rgba(255,255,255,0.02)] text-slate-300"}`}
+              >
+                {g.active ? "Active" : "Inactive"}
+              </button>
+              <div className="mt-2 text-xs text-slate-400">{g.progress}%</div>
             </div>
           </li>
         ))}
