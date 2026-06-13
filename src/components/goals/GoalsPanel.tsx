@@ -92,7 +92,7 @@ export function GoalsPanel() {
         </div>
       </form>
 
-      <ul className="mt-4 space-y-3" aria-label="Goals list">
+      <ul className="mt-4 space-y-3" aria-label="Goals list" suppressHydrationWarning>
         {goalError && (
           <div role="alert" aria-live="assertive" className="text-sm text-rose-500">
             {goalError}

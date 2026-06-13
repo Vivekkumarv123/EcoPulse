@@ -31,7 +31,7 @@ export function RecentLedger({
       </div>
 
       <div className="overflow-x-auto">
-        <ul className="min-w-[500px] divide-y divide-white/[0.03]">
+        <ul className="min-w-[500px] divide-y divide-white/[0.03]" suppressHydrationWarning>
           {entries.slice(0, RECENT_LEDGER_MAX).map((e) => (
             <li
               key={e.id}

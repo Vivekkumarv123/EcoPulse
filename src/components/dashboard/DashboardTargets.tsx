@@ -17,7 +17,7 @@ export function DashboardTargets({ targets }: { targets: readonly CarbonTarget[]
         Target Summary
       </h2>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" suppressHydrationWarning>
         {targets.map((target) => (
           <div
             key={`${target.category}-${target.interval}`}

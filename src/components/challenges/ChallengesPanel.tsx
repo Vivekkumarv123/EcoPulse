@@ -90,7 +90,7 @@ export function ChallengesPanel() {
         </div>
       </form>
 
-      <ul className="mt-4 space-y-3" aria-label="Challenges list">
+      <ul className="mt-4 space-y-3" aria-label="Challenges list" suppressHydrationWarning>
         {challengeError && (
           <div role="alert" aria-live="assertive" className="text-sm text-rose-500">
             {challengeError}

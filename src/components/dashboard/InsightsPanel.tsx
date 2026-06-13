@@ -16,7 +16,7 @@ export function InsightsPanel({ insights }: { insights: readonly Insight[] }) {
         AI Optimization Engine Insights
       </h2>
 
-      <ul className="flex-1 space-y-3 overflow-y-auto">
+      <ul className="flex-1 space-y-3 overflow-y-auto" suppressHydrationWarning>
         {insights.map((i) => (
           <li
             key={i.id}

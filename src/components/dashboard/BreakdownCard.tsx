@@ -67,7 +67,7 @@ export function BreakdownCard({
           </div>
         </div>
 
-        <ul className="space-y-4 sm:col-span-7">
+        <ul className="space-y-4 sm:col-span-7" suppressHydrationWarning>
           {metrics.map((metric) => {
             const percentage = Math.min(Math.round((metric.value / totalWeight) * 100), 100) || 0;
             return (
