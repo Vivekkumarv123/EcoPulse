@@ -41,10 +41,13 @@ function main() {
   const manifest = path.join(serverDir, 'subresource-integrity-manifest.json');
   if (fs.existsSync(manifest)) {
     try {
-      fs.unlinkSync(manifest);
-      console.log('Removed', manifest);
+      // Preserve the manifest file to avoid build systems (e.g. Vercel)
+      // failing when they lstat the file. Replace contents with an
+      // empty object as a safe fallback.
+      fs.writeFileSync(manifest, '{}', 'utf8');
+      console.log('Reset', manifest);
     } catch (err) {
-      console.warn('Failed to remove manifest:', err.message);
+      console.warn('Failed to reset manifest:', err.message);
     }
   }
 }
